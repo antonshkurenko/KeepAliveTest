@@ -16,10 +16,13 @@
 
 package io.github.tonyshkurenko.keepalivetest
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.preference.PreferenceManager
 import android.support.v7.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.switch_control
+import android.util.Log
+import android.widget.CheckBox
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,9 +30,24 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    switch_control.setOnCheckedChangeListener { _, b ->
+    PreferenceManager.getDefaultSharedPreferences(this@MainActivity).getBoolean("push_via_broadcast", false)
+        .apply {
+          findViewById<CheckBox>(R.id.switch_control).isChecked = this
+        }
+
+    findViewById<CheckBox>(R.id.switch_control).setOnCheckedChangeListener { _, b ->
       PreferenceManager.getDefaultSharedPreferences(this@MainActivity).run {
         edit().putBoolean("push_via_broadcast", b).apply()
+      }
+
+      runOnUiThread {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+          Log.i(KeepAliveService.TAG, "stopService in onCreate app")
+          stopService(
+              Intent(applicationContext, KeepAliveService::class.java))
+        } else {
+          Log.w(KeepAliveService.TAG, "Oreo is not supported")
+        }
       }
     }
   }
