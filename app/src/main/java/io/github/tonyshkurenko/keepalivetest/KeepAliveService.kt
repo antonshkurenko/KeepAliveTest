@@ -21,6 +21,9 @@ import android.content.Intent
 import android.os.Build
 import android.preference.PreferenceManager
 import android.util.Log
+import java.util.Timer
+import java.util.TimerTask
+
 
 /**
  * Project: KeepAliveTest
@@ -30,6 +33,8 @@ import android.util.Log
  * @since 7/24/18
  */
 class KeepAliveService : Service() {
+
+  var t: Timer? = null
 
   companion object {
     val TAG = "KeepAlive"
@@ -41,13 +46,30 @@ class KeepAliveService : Service() {
     super.onCreate()
 
     Log.i(TAG, "onCreate keep alive service")
+
+    var tick = 0
+
+    t?.cancel()
+    t = Timer()
+    t!!.scheduleAtFixedRate(object : TimerTask() {
+      override fun run() {
+        Log.i(TAG, "tick tack: ${tick++}")
+      }
+    }, 0, 1000)
   }
 
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) = START_STICKY
 
+  override fun onTaskRemoved(rootIntent: Intent?) {
+    super.onTaskRemoved(rootIntent)
+
+    Log.i(TAG, "onTaskRemoved called")
+  }
+
   override fun onDestroy() {
     super.onDestroy()
 
+    t?.cancel()
     Log.i(TAG, "onDestroy keep alive service")
 
     PreferenceManager.getDefaultSharedPreferences(this).run {

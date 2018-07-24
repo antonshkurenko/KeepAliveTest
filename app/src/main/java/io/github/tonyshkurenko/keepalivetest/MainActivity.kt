@@ -30,7 +30,8 @@ class MainActivity : AppCompatActivity() {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.activity_main)
 
-    PreferenceManager.getDefaultSharedPreferences(this@MainActivity).getBoolean("push_via_broadcast", false)
+    PreferenceManager.getDefaultSharedPreferences(this@MainActivity).getBoolean(
+        "push_via_broadcast", false)
         .apply {
           findViewById<CheckBox>(R.id.switch_control).isChecked = this
         }
